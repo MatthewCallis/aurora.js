@@ -1,3 +1,4 @@
+import AIFFDemuxer from './../../src/demuxers/aiff';
 import demuxerTest from './_demuxerTest';
 
 demuxerTest('bei16', {
@@ -66,4 +67,16 @@ demuxerTest('alaw', {
   },
   duration: 7877,
   data: 'f4b20b9b',
+});
+
+demuxerTest('Invalid AIFF due to missing FORM header', {
+  file: 'au/bei16.au',
+  demuxer: AIFFDemuxer,
+  error: 'Invalid AIFF.',
+});
+
+demuxerTest('Invalid AIFF due to invalid file type header', {
+  file: 'aiff/alaw_bad_file_type_header.aifc',
+  demuxer: AIFFDemuxer,
+  error: 'Invalid AIFF.',
 });

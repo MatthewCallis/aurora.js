@@ -28,10 +28,22 @@ const demuxerTest = (name, config) =>
     }
 
     source.once('data', (chunk) => {
-      const Demuxer = AVDemuxer.find(chunk);
-      const demuxer = new Demuxer(source, chunk);
+      let demuxer;
+      if (config.demuxer) {
+        demuxer = new config.demuxer(source, chunk);
+      } else {
+        const Demuxer = AVDemuxer.find(chunk);
+        demuxer = new Demuxer(source, chunk);
+      }
 
-      const expect = (config.format != null) + (config.duration != null) + (config.metadata != null) + (config.chapters != null) + (config.cookie != null) + (config.data != null);
+      const expect = (config.format != null) +
+                      (config.duration != null) +
+                      (config.metadata != null) +
+                      (config.chapters != null) +
+                      (config.cookie != null) +
+                      (config.data != null) +
+                      (config.error != null);
+
       t.truthy(expect);
 
       if (config.format) {
@@ -40,6 +52,20 @@ const demuxerTest = (name, config) =>
 
       if (config.duration) {
         demuxer.once('duration', duration => t.is(duration, config.duration));
+      }
+
+      if (config.error) {
+        demuxer.on('error', (error) => {
+          t.is(error, config.error);
+          t.end();
+        });
+      }
+
+      if (config.cookie) {
+        demuxer.on('cookie', (cookie) => {
+          t.is(cookie.constructor.name, config.cookie);
+          t.end();
+        });
       }
 
       if (config.metadata) {

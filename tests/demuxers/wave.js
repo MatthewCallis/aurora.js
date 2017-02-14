@@ -1,3 +1,4 @@
+import WAVEDemuxer from './../../src/demuxers/wave';
 import demuxerTest from './_demuxerTest';
 
 demuxerTest('lei16', {
@@ -62,4 +63,22 @@ demuxerTest('read the full fmt chunk', {
   },
   duration: 8916,
   data: '82d0f0ea',
+});
+
+demuxerTest('Invalid WAVE due to missing RIFF header', {
+  file: 'au/bei16.au',
+  demuxer: WAVEDemuxer,
+  error: 'Invalid WAV file (No RIFF).',
+});
+
+demuxerTest('Invalid WAVE due to invalid file type header', {
+  file: 'wave/ulaw_bad_wave_header.wav',
+  demuxer: WAVEDemuxer,
+  error: 'Invalid WAV file (No WAVE).',
+});
+
+demuxerTest('Invalid WAVE due to unsupported file format', {
+  file: 'wave/ulaw unsupported_format.wav',
+  demuxer: WAVEDemuxer,
+  error: 'Unsupported format in WAV file. (8)',
 });

@@ -31,6 +31,7 @@ export default class AIFFDemuxer extends AVDemuxer {
 
       switch (this.type) {
         case 'COMM': {
+          /* istanbul ignore next */
           if (!this.stream.available(this.len)) {
             return;
           }

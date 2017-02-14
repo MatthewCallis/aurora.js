@@ -2,6 +2,19 @@ import AVDemuxer from '../demuxer';
 import M4ADemuxer from './m4a';
 
 export default class CAFDemuxer extends AVDemuxer {
+  // https://developer.apple.com/library/content/documentation/MusicAudio/Reference/CAFSpec/CAF_spec/CAF_spec.html
+  // kAudioFormatLinearPCM      = 'lpcm',
+  // kAudioFormatAppleIMA4      = 'ima4',
+  // kAudioFormatMPEG4AAC       = 'aac ',
+  // kAudioFormatMACE3          = 'MAC3',
+  // kAudioFormatMACE6          = 'MAC6',
+  // kAudioFormatULaw           = 'ulaw',
+  // kAudioFormatALaw           = 'alaw',
+  // kAudioFormatMPEGLayer1     = '.mp1',
+  // kAudioFormatMPEGLayer2     = '.mp2',
+  // kAudioFormatMPEGLayer3     = '.mp3',
+  // kAudioFormatAppleLossless  = 'alac'
+
   static probe(buffer) {
     return buffer.peekString(0, 4) === 'caff';
   }
@@ -9,18 +22,21 @@ export default class CAFDemuxer extends AVDemuxer {
   readChunk() {
     if (!this.format && this.stream.available(64)) { // Number out of my behind
       if (this.stream.readString(4) !== 'caff') {
-        return this.emit('error', "Invalid CAF, does not begin with 'caff'");
+        this.emit('error', "Invalid CAF, does not begin with 'caff'");
+        return;
       }
 
-            // skip version and flags
+      // skip version and flags
       this.stream.advance(4);
 
       if (this.stream.readString(4) !== 'desc') {
-        return this.emit('error', "Invalid CAF, 'caff' is not followed by 'desc'");
+        this.emit('error', "Invalid CAF, 'caff' is not followed by 'desc'");
+        return;
       }
 
       if ((this.stream.readUInt32() !== 0) || (this.stream.readUInt32() !== 32)) {
-        return this.emit('error', "Invalid 'desc' size, should be 32");
+        this.emit('error', "Invalid 'desc' size, should be 32");
+        return;
       }
 
       this.format = {};
@@ -52,7 +68,8 @@ export default class CAFDemuxer extends AVDemuxer {
         };
 
         if (this.headerCache.oversize) {
-          return this.emit('error', 'Holy Shit, an oversized file, not supported in JS');
+          this.emit('error', 'Holy Shit, an oversized file, not supported in JS');
+          return;
         }
       }
 
@@ -65,7 +82,6 @@ export default class CAFDemuxer extends AVDemuxer {
               if (cookie) {
                 this.emit('cookie', cookie);
               }
-
               this.stream.seek(offset); // skip extra garbage
             } else {
               buffer = this.stream.readBuffer(this.headerCache.size);
@@ -79,13 +95,15 @@ export default class CAFDemuxer extends AVDemuxer {
         case 'pakt': {
           if (this.stream.available(this.headerCache.size)) {
             if (this.stream.readUInt32() !== 0) {
-              return this.emit('error', 'Sizes greater than 32 bits are not supported.');
+              this.emit('error', 'Sizes greater than 32 bits are not supported.');
+              return;
             }
 
             this.numPackets = this.stream.readUInt32();
 
             if (this.stream.readUInt32() !== 0) {
-              return this.emit('error', 'Sizes greater than 32 bits are not supported.');
+              this.emit('error', 'Sizes greater than 32 bits are not supported.');
+              return;
             }
 
             this.numFrames = this.stream.readUInt32();

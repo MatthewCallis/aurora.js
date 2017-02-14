@@ -5,10 +5,17 @@ export default class WAVEDemuxer extends AVDemuxer {
     super(source, chunk);
 
     this.wave_formats = {
-      0x0001: 'lpcm',
-      0x0003: 'lpcm',
-      0x0006: 'alaw',
-      0x0007: 'ulaw',
+      // 0x0000:      // Unknown
+      0x0001: 'lpcm', // Pulse Code Modulation (PCM) / Uncompressed
+      // 0x0002:      // Microsoft ADPCM
+      0x0003: 'lpcm', // Unknown
+      0x0006: 'alaw', // ITU G.711 a-law
+      0x0007: 'ulaw', // ITU G.711 µ-law
+      // 0x0011:      // IMA ADPCM
+      // 0x0016:      // ITU G.723 ADPCM (Yamaha)
+      // 0x0031:      // GSM 6.10
+      // 0x0040:      // ITU G.721 ADPCM
+      // 0x0050:      // MPEG
     };
   }
 
@@ -19,7 +26,7 @@ export default class WAVEDemuxer extends AVDemuxer {
   readChunk() {
     if (!this.readStart && this.stream.available(12)) {
       if (this.stream.readString(4) !== 'RIFF') {
-        this.emit('error', 'Invalid WAV file.');
+        this.emit('error', 'Invalid WAV file (No RIFF).');
         return;
       }
 
@@ -27,7 +34,7 @@ export default class WAVEDemuxer extends AVDemuxer {
       this.readStart = true;
 
       if (this.stream.readString(4) !== 'WAVE') {
-        this.emit('error', 'Invalid WAV file.');
+        this.emit('error', 'Invalid WAV file (No WAVE).');
         return;
       }
     }
@@ -41,8 +48,8 @@ export default class WAVEDemuxer extends AVDemuxer {
       switch (this.type) {
         case 'fmt ': {
           const encoding = this.stream.readUInt16(true);
-          if (!(encoding in this.wave_formats)) {
-            this.emit('error', 'Unsupported format in WAV file.');
+          if (this.wave_formats[encoding] == null) {
+            this.emit('error', `Unsupported format in WAV file. (${encoding})`);
             return;
           }
 

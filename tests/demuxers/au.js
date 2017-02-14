@@ -1,3 +1,4 @@
+import AUDemuxer from './../../src/demuxers/au';
 import demuxerTest from './_demuxerTest';
 
 demuxerTest('bei16', {
@@ -11,6 +12,7 @@ demuxerTest('bei16', {
     framesPerPacket: 1,
     littleEndian: false,
     floatingPoint: false,
+    dataOffset: 28,
   },
   duration: 7430,
   data: 'd4c3bdc0',
@@ -27,6 +29,7 @@ demuxerTest('bef32', {
     framesPerPacket: 1,
     littleEndian: false,
     floatingPoint: true,
+    dataOffset: 28,
   },
   duration: 7430,
   data: '52dbaba2',
@@ -43,6 +46,7 @@ demuxerTest('alaw', {
     framesPerPacket: 1,
     littleEndian: false,
     floatingPoint: false,
+    dataOffset: 24,
   },
   duration: 7430,
   data: 'e49cda0c',
@@ -59,7 +63,21 @@ demuxerTest('ulaw', {
     framesPerPacket: 1,
     littleEndian: false,
     floatingPoint: false,
+    dataOffset: 28,
   },
   duration: 7430,
   data: '18b71b9b',
+});
+
+
+demuxerTest('Invalid AU due to missing .snd header', {
+  file: 'aiff/bei16.aiff',
+  demuxer: AUDemuxer,
+  error: 'Invalid AU file.',
+});
+
+demuxerTest('Invalid AU due to unsupported encoding.', {
+  file: 'au/alaw_bad_header.au',
+  demuxer: AUDemuxer,
+  error: 'Unsupported encoding in AU file.',
 });
