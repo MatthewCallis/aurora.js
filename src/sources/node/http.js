@@ -13,18 +13,24 @@ export default class AVHTTPSource extends AVEventEmitter {
 
     this.loaded = 0;
     this.size = 0;
+
+    this.paused = true;
   }
 
   start() {
+    this.paused = false;
+
     if (this.response != null) {
-      return this.response.resume();
+      this.response.resume();
+      return;
     }
 
     this.request = http.get(this.url);
     this.request.on('response', (response) => {
       this.response = response;
       if (this.response.statusCode !== 200) {
-        return this.errorHandler(`Error loading file. HTTP status code ${this.response.statusCode}`);
+        this.errorHandler(`Error loading file. HTTP status code ${this.response.statusCode}`);
+        return;
       }
 
       this.size = parseInt(this.response.headers['content-length'], 10);
@@ -33,23 +39,23 @@ export default class AVHTTPSource extends AVEventEmitter {
       this.response.on('data', (chunk) => {
         this.loaded += chunk.length;
         this.emit('progress', (this.loaded / this.size) * 100);
-        return this.emit('data', new AVBuffer(new Uint8Array(chunk)));
-      }
-            );
+        this.emit('data', new AVBuffer(new Uint8Array(chunk)));
+      });
 
-      this.response.on('end', () => this.emit('end')
-            );
+      this.response.on('end', () => {
+        this.emit('end');
+      });
 
-      return this.response.on('error', this.errorHandler);
-    }
-        );
+      this.response.on('error', this.errorHandler);
+    });
 
-    return this.request.on('error', this.errorHandler);
+    this.request.on('error', this.errorHandler);
   }
 
   pause() {
     if (this.response) {
       this.response.pause();
+      this.paused = true;
     }
   }
 
@@ -60,8 +66,8 @@ export default class AVHTTPSource extends AVEventEmitter {
     this.response = null;
   }
 
-  errorHandler(err) {
+  errorHandler(error) {
     this.reset();
-    this.emit('error', err);
+    this.emit('error', error);
   }
 }

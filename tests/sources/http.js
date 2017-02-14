@@ -7,13 +7,27 @@ test.cb('data', (t) => {
   const crc = new CRC32();
   const source = new AVHTTPSource('http://localhost:8181/tests/data/m4a/base.m4a');
 
-  source.on('data', chunk => crc.update(chunk));
+  source.on('data', (chunk) => {
+    crc.update(chunk);
+  });
 
   source.on('end', () => {
     t.is(crc.toHex(), '84d9f967');
     t.end();
   });
 
+  source.start();
+});
+
+test.cb('start with resume', (t) => {
+  const source = new AVHTTPSource('http://localhost:8181/tests/data/m4a/base.m4a');
+
+  const resume = () => {
+    t.true(true);
+    t.end();
+  };
+
+  source.response = { resume };
   source.start();
 });
 

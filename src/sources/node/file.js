@@ -10,12 +10,14 @@ export default class AVFileSource extends AVEventEmitter {
     this.stream = null;
     this.loaded = 0;
     this.size = null;
+
+    this.paused = true;
   }
 
   getSize() {
-    fs.stat(this.filename, (err, stat) => {
-      if (err) {
-        this.emit('error', err);
+    fs.stat(this.filename, (error, stat) => {
+      if (error) {
+        this.emit('error', error);
         return;
       }
 
@@ -25,6 +27,7 @@ export default class AVFileSource extends AVEventEmitter {
   }
 
   start() {
+    this.paused = false;
     if (this.size == null) {
       this.getSize();
       return;
@@ -37,23 +40,24 @@ export default class AVFileSource extends AVEventEmitter {
 
     this.stream = fs.createReadStream(this.filename);
 
-    this.stream.on('data', (buf) => {
-      this.loaded += buf.length;
+    this.stream.on('data', (buffer) => {
+      this.loaded += buffer.length;
       this.emit('progress', (this.loaded / this.size) * 100);
-      this.emit('data', new AVBuffer(new Uint8Array(buf)));
+      this.emit('data', new AVBuffer(new Uint8Array(buffer)));
     });
 
     this.stream.on('end', () => {
       this.emit('end');
     });
 
-    this.stream.on('error', (err) => {
+    this.stream.on('error', (error) => {
       this.pause();
-      this.emit('error', err);
+      this.emit('error', error);
     });
   }
 
   pause() {
-    return this.stream.pause();
+    this.stream.pause();
+    this.paused = true;
   }
 }
