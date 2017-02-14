@@ -1,4 +1,5 @@
 import fs from 'fs';
+import path from 'path';
 import test from 'ava';
 
 import AVBuffer from './../../src/core/buffer';
@@ -6,7 +7,7 @@ import AVBufferList from './../../src/core/bufferlist';
 import AVBufferSource from './../../src/sources/buffer';
 import CRC32 from './../_crc32';
 
-let buffer = null;
+let buffer;
 
 const getData = (fn) => {
   if (buffer) {
@@ -15,8 +16,14 @@ const getData = (fn) => {
   }
 
   // If we're in Node, we can read any file we like, otherwise simulate by reading a blob from an XHR and loading it using a FileSource.
+  const file = 'm4a/base.m4a';
+
   if (process) {
-    fs.readFile('../data/m4a/base.m4a', (err, data) => {
+    const filepath = path.resolve(__dirname, `../data/${file}`);
+    fs.readFile(filepath, (err, data) => {
+      if (err) {
+        throw err;
+      }
       buffer = new Uint8Array(data);
       fn();
     });
@@ -24,7 +31,7 @@ const getData = (fn) => {
   }
 
   const xhr = new XMLHttpRequest();
-  xhr.open('GET', 'http://localhost:8181/data/m4a/base.m4a');
+  xhr.open('GET', `http://localhost:8181/data/${file}`);
   xhr.responseType = 'arraybuffer';
   xhr.send();
   xhr.onload = () => {
@@ -110,6 +117,41 @@ test.cb('AVBufferList', (t) => {
 
     source.on('end', () => {
       t.is(count, 3);
+      t.end();
+    });
+
+    source.start();
+  });
+});
+
+test.cb('pause', (t) => {
+  getData(() => {
+    const source = new AVBufferSource(new AVBuffer(buffer));
+
+    source.on('data', () => {
+      source.pause();
+    });
+
+    source.on('end', () => {
+      t.true(source.paused);
+      t.end();
+    });
+
+    source.start();
+  });
+});
+
+// Pauses, rewinds buffer list.
+test.cb('reset', (t) => {
+  getData(() => {
+    const source = new AVBufferSource(new AVBuffer(buffer));
+
+    source.on('data', () => {
+      source.reset();
+    });
+
+    source.on('end', () => {
+      t.true(source.paused);
       t.end();
     });
 

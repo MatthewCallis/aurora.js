@@ -7,6 +7,7 @@ import AVUnderflowError from './core/underflow_error';
 export default class AVDecoder extends AVEventEmitter {
   constructor(demuxer, format) {
     super();
+
     this.demuxer = demuxer;
     this.format = format;
     const list = new AVBufferList();

@@ -80,7 +80,7 @@ test('create from another AVBuffer', (t) => {
 
 // Node
 if (process) {
-  test.only('create from node buffer', (t) => {
+  test('create from node buffer', (t) => {
     const buf = new AVBuffer(new Buffer([1, 2, 3, 4, 5, 6, 7, 8, 9]));
     t.is(9, buf.length);
     t.truthy(buf.data instanceof Uint8Array);

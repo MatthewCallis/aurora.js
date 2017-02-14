@@ -13,9 +13,7 @@ export default class AVStream {
     this.uint32 = new Uint32Array(this.buf);
     this.int32 = new Int32Array(this.buf);
     this.float32 = new Float32Array(this.buf);
-    if (typeof Float64Array !== 'undefined' && Float64Array !== null) {
-      this.float64 = new Float64Array(this.buf);
-    }
+    this.float64 = new Float64Array(this.buf);
 
     // detect the native endianness of the machine
     // 0x3412 is little endian, 0x1234 is big endian
@@ -70,7 +68,7 @@ export default class AVStream {
       throw new AVUnderflowError();
     }
 
-        // if we're at the end of the bufferlist, seek from the end
+    // if we're at the end of the bufferlist, seek from the end
     if (!this.list.first) {
       this.list.rewind();
       this.localOffset = this.list.first.length;
@@ -102,7 +100,7 @@ export default class AVStream {
       throw new AVUnderflowError();
     }
 
-    const a = this.list.first.data[this.localOffset];
+    const output = this.list.first.data[this.localOffset];
     this.localOffset += 1;
     this.offset += 1;
 
@@ -111,11 +109,10 @@ export default class AVStream {
       this.list.advance();
     }
 
-    return a;
+    return output;
   }
 
-  peekUInt8(offset) {
-    if (offset == null) { offset = 0; }
+  peekUInt8(offset = 0) {
     if (!this.available(offset + 1)) {
       throw new AVUnderflowError();
     }
@@ -135,8 +132,7 @@ export default class AVStream {
     return 0;
   }
 
-  read(bytes, littleEndian) {
-    if (littleEndian == null) { littleEndian = false; }
+  read(bytes, littleEndian = false) {
     if (littleEndian === this.nativeEndian) {
       for (let i = 0; i < bytes; i++) {
         this.uint8[i] = this.readUInt8();
@@ -251,22 +247,12 @@ export default class AVStream {
 
   readFloat64(littleEndian) {
     this.read(8, littleEndian);
-
-    // use Float64Array if available
-    if (this.float64) {
-      return this.float64[0];
-    }
-    return this.float64Fallback();
+    return this.float64[0];
   }
 
   peekFloat64(offset = 0, littleEndian) {
     this.peek(8, offset, littleEndian);
-
-        // use Float64Array if available
-    if (this.float64) {
-      return this.float64[0];
-    }
-    return this.float64Fallback();
+    return this.float64[0];
   }
 
     // IEEE 80 bit extended float
@@ -284,7 +270,7 @@ export default class AVStream {
     const result = AVBuffer.allocate(length);
     const to = result.data;
 
-    for (let i = 0, end = length; i < end; i++) {
+    for (let i = 0; i < length; i++) {
       to[i] = this.readUInt8();
     }
 
@@ -295,7 +281,7 @@ export default class AVStream {
     const result = AVBuffer.allocate(length);
     const to = result.data;
 
-    for (let i = 0, end = length; i < end; i++) {
+    for (let i = 0; i < length; i++) {
       to[i] = this.peekUInt8(offset + i);
     }
 
@@ -319,27 +305,6 @@ export default class AVStream {
 
   peekString(offset = 0, length, encoding = 'ascii') {
     return this.decodeString(offset, length, encoding, false);
-  }
-
-  float64Fallback() {
-    const [low, high] = Array.from(this.uint32);
-    if (!high || (high === 0x80000000)) { return 0.0; }
-
-    const sign = 1 - ((high >>> 31) * 2); // +1 or -1
-    let exp = (high >>> 20) & 0x7ff;
-    const frac = high & 0xfffff;
-
-        // NaN or Infinity
-    if (exp === 0x7ff) {
-      if (frac) { return NaN; }
-      return sign * Infinity;
-    }
-
-    exp -= 1023;
-    let out = (frac | 0x100000) * Math.pow(2, exp - 20);
-    out += low * Math.pow(2, exp - 52);
-
-    return sign * out;
   }
 
   float80() {
@@ -487,7 +452,9 @@ export default class AVStream {
       }
     }
 
-    if (advance) { this.advance(offset); }
+    if (advance) {
+      this.advance(offset);
+    }
     return result;
   }
 }

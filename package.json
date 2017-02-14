@@ -51,6 +51,20 @@
     "node >= v6.0.0"
   ],
   "main": "node.js",
+  "babel": {
+    "presets": [
+      "es2015"
+    ],
+    "plugins": [
+      "transform-runtime"
+    ],
+    "ignore": "tests/**/*.js",
+    "env": {
+      "development": {
+        "sourceMaps": "inline"
+      }
+    }
+  },
   "ava": {
     "files": [
       "tests/**/*.js"
@@ -68,21 +82,10 @@
     "verbose": true,
     "babel": "inherit"
   },
-  "babel": {
-    "presets": [
-      "es2015"
-    ],
-    "plugins": [
-      "transform-runtime"
-    ],
-    "ignore": "tests/**/*.js",
-    "env": {
-      "development": {
-        "sourceMaps": "inline"
-      }
-    }
-  },
   "nyc": {
+    "cache": true,
+    "all": true,
+    "check-coverage": false,
     "include": [
       "src/**/*.js"
     ]

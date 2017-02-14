@@ -1,16 +1,20 @@
 import test from 'ava';
+import path from 'path';
 import CRC32 from './../_crc32';
 import AVFileSource from './../../src/sources/node/file';
 
 const getSource = (fn) => {
   // if we're in Node, we can read any file we like, otherwise simulate by reading a blob from an XHR and loading it using a FileSource
+  const file = 'm4a/base.m4a';
+
   if (process) {
-    fn(new AVFileSource('../data/m4a/base.m4a'));
+    const filepath = path.resolve(__dirname, `../data/${file}`);
+    fn(new AVFileSource(filepath));
     return;
   }
 
   const xhr = new XMLHttpRequest();
-  xhr.open('GET', 'http://localhost:8181/data/m4a/base.m4a');
+  xhr.open('GET', `http://localhost:8181/data/${file}`);
   xhr.responseType = 'blob';
   xhr.send();
   xhr.onload = () => {

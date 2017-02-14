@@ -5,7 +5,7 @@ import AVHTTPSource from './../../src/sources/node/http';
 // check that the data returned by the source is correct, using a CRC32 checksum
 test.cb('data', (t) => {
   const crc = new CRC32();
-  const source = new AVHTTPSource('http://localhost:8181/data/m4a/base.m4a');
+  const source = new AVHTTPSource('http://localhost:8181/tests/data/m4a/base.m4a');
 
   source.on('data', chunk => crc.update(chunk));
 
@@ -18,7 +18,7 @@ test.cb('data', (t) => {
 });
 
 test.cb('progress', (t) => {
-  const source = new AVHTTPSource('http://localhost:8181/data/m4a/base.m4a');
+  const source = new AVHTTPSource('http://localhost:8181/tests/data/m4a/base.m4a');
 
   let lastProgress = 0;
   source.on('progress', (progress) => {
@@ -47,7 +47,7 @@ test.cb('invalid url error', (t) => {
 });
 
 test.cb('404', (t) => {
-  const source = new AVHTTPSource('http://localhost:8181/nothing.m4a');
+  const source = new AVHTTPSource('http://localhost:8181/tests/data/nothing.m4a');
 
   source.on('error', () => {
     t.truthy(true);

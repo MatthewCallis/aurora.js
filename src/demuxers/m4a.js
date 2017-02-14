@@ -303,7 +303,8 @@ export default class M4ADemuxer extends AVDemuxer {
       // read the chapter information if any
       if (!this.readChapters) {
         this.readChapters = this.parseChapters();
-        if (this.break === !this.readChapters) {
+        // NOTE: Not sure why there is an assignment here, and don't know the proper fix.
+        if (this.break = !this.readChapters) {
           return;
         }
         this.stream.seek(this.mdatOffset);

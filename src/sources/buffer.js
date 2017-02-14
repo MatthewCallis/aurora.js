@@ -24,12 +24,14 @@ export default class AVBufferSource extends AVEventEmitter {
   }
 
   loop() {
-    this.emit('progress', ((((this.list.numBuffers - this.list.availableBuffers) + 1) / this.list.numBuffers) * 100) | 0);
+    const progress = ((((this.list.numBuffers - this.list.availableBuffers) + 1) / this.list.numBuffers) * 100) | 0;
+    this.emit('progress', progress);
     this.emit('data', this.list.first);
     if (this.list.advance()) {
-      return setImmediate(this.loop);
+      setImmediate(this.loop);
+      return;
     }
-    return this.emit('end');
+    this.emit('end');
   }
 
   pause() {

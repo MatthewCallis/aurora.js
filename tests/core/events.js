@@ -27,6 +27,8 @@ test('off', (t) => {
   emitter.off('test', fn);
   emitter.emit('test');
 
+  emitter.off('test-new', fn);
+
   t.is(1, times);
 });
 
