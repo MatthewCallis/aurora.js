@@ -88,6 +88,7 @@ test('remainingBytes', (t) => {
 
 test('buffer', (t) => {
   const stream = makeStream([10, 160], [20, 29, 119]);
+  t.deepEqual(new AVBuffer(new Uint8Array([10, 160, 20, 29])), stream.peekBuffer(undefined, 4));
   t.deepEqual(new AVBuffer(new Uint8Array([10, 160, 20, 29])), stream.peekBuffer(0, 4));
   t.deepEqual(new AVBuffer(new Uint8Array([160, 20, 29, 119])), stream.peekBuffer(1, 4));
   t.deepEqual(new AVBuffer(new Uint8Array([10, 160, 20, 29])), stream.readBuffer(4));
@@ -104,7 +105,7 @@ test('uint8', (t) => {
   let stream = makeStream([10, 160], [20, 29, 119]);
   const values = [10, 160, 20, 29, 119];
 
-      // check peek with correct offsets across buffers
+  // check peek with correct offsets across buffers
   for (let i = 0; i < values.length; i++) {
     value = values[i];
     t.is(value, stream.peekUInt8(i));
@@ -112,16 +113,22 @@ test('uint8', (t) => {
 
   t.throws(() => stream.peekUInt8(10), Error);
 
-      // check reading across buffers
+  // check reading across buffers
   for (value of Array.from(values)) {
     t.is(value, stream.readUInt8());
   }
 
   t.throws(() => stream.readUInt8(), Error);
 
-      // if it were a signed int, would be -1
+  // if it were a signed int, would be -1
   stream = makeStream([255, 23]);
   t.is(255, stream.readUInt8());
+
+  // Get to the end.
+  stream = makeStream([255, 23]);
+  stream.available = () => true;
+  stream.list.first = null;
+  t.is(0, stream.peekUInt8());
 });
 
 test('int8', (t) => {
@@ -129,13 +136,14 @@ test('int8', (t) => {
   const stream = makeStream([0x23, 0xff, 0x87], [0xab, 0x7c, 0xef]);
   const values = [0x23, -1, -121, -85, 124, -17];
 
-      // peeking
+  // peeking
+  t.is(values[0], stream.peekInt8());
   for (let i = 0; i < values.length; i++) {
     value = values[i];
     t.is(value, stream.peekInt8(i));
   }
 
-      // reading
+  // reading
   return (() => {
     const result = [];
     for (value of Array.from(values)) {
@@ -163,17 +171,17 @@ test('uint16', (t) => {
     t.is(value, stream.peekUInt16(i, true));
   }
 
-      // reading big endian
+  // reading big endian
   for (const value of [0x23, 0x423f]) {
     t.is(value, stream.readUInt16());
   }
 
-      // reading little endian
+  // reading little endian
   for (const value of [0x2300, 0x3f42]) {
     t.is(value, copy.readUInt16(true));
   }
 
-      // check that it interprets as unsigned
+  // check that it interprets as unsigned
   stream = makeStream([0xfe, 0xfe]);
   t.is(0xfefe, stream.peekUInt16(0));
   t.is(0xfefe, stream.peekUInt16(0, true));
@@ -185,6 +193,7 @@ test('int16', (t) => {
 
   // peeking big endian
   const iterable = [0x1679, -128];
+  t.is(0x1679, stream.peekInt16());
   for (let i = 0; i < iterable.length; i++) {
     const value = iterable[i];
     t.is(value, stream.peekInt16(i * 2));
@@ -252,6 +261,7 @@ test('int24', (t) => {
 
   // peeking big endian
   const iterable = [0x231656, 0x1656ff, 0x56ff10, -61190];
+  t.is(iterable[0], stream.peekInt24());
   for (let i = 0; i < iterable.length; i++) {
     const value = iterable[i];
     t.is(value, stream.peekInt24(i));
@@ -302,7 +312,7 @@ test('uint32', (t) => {
     t.is(value, stream.readUInt32());
   }
 
-      // reading little endian
+  // reading little endian
   return (() => {
     const result = [];
     for (const value of [0x56426532, 0x1145ff23]) {
@@ -331,7 +341,7 @@ test('int32', (t) => {
     t.is(value, stream2.peekInt32(i));
   }
 
-      // peeking little endian
+  // peeking little endian
   const iterable2 = [0x79165343, -84934913];
   for (let i = 0; i < iterable2.length; i++) {
     const value = iterable2[i];
@@ -344,12 +354,12 @@ test('int32', (t) => {
     t.is(value, stream2.peekInt32(i, true));
   }
 
-      // reading big endian
+  // reading big endian
   for (const value of [0x43531679, -69638]) {
     t.is(value, stream.readInt32());
   }
 
-      // reading little endian
+  // reading little endian
   for (const value of [0x79165343, -84934913]) {
     t.is(value, copy.readInt32(true));
   }
@@ -398,6 +408,7 @@ test('float32', (t) => {
 
   // special cases
   const stream2 = makeStream([0xff, 0xff, 0x7f, 0x7f]);
+  t.truthy(isNaN(stream2.peekFloat32()));
   t.truthy(isNaN(stream2.peekFloat32(0)));
   t.is(3.4028234663852886e+38, stream2.peekFloat32(0, true));
 });
@@ -405,6 +416,7 @@ test('float32', (t) => {
 test('float64', (t) => {
   let stream = makeStream([0x55, 0x55, 0x55, 0x55, 0x55, 0x55], [0xd5, 0x3f]);
   let copy = stream.copy();
+  t.is(1.1945305291680097e+103, stream.peekFloat64());
   t.is(1.1945305291680097e+103, stream.peekFloat64(0));
   t.is(0.3333333333333333, stream.peekFloat64(0, true));
   t.is(1.1945305291680097e+103, stream.readFloat64());
@@ -562,10 +574,14 @@ test('float80', (t) => {
   stream = makeStream([0x41, 0x55, 0xaa, 0xaa, 0xaa, 0xaa, 0xae, 0xa9, 0xf8, 0x00]);
   t.is(1.1945305291680097e+103, stream.peekFloat80());
   t.is(1.1945305291680097e+103, stream.readFloat80());
+
+  stream = makeStream([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+  t.is(0, stream.peekFloat80());
 });
 
 test('ascii/latin1', (t) => {
   const stream = makeStream([0x68, 0x65, 0x6c, 0x6c, 0x6f]);
+  t.is('hello', stream.peekString(undefined, 5));
   t.is('hello', stream.peekString(0, 5));
   t.is('hello', stream.peekString(0, 5, 'ascii'));
   t.is('hello', stream.peekString(0, 5, 'latin1'));
@@ -809,4 +825,28 @@ test('utf16-bom little endian, null terminated', (t) => {
   t.is('👍', stream.peekString(0, null, 'utf16bom'));
   t.is('👍', stream.readString(null, 'utf16bom'));
   t.is(8, stream.offset);
+});
+
+test('decodeString', (t) => {
+  const stream = makeStream([0xff, 0xfe, 252, 0, 98, 0, 101, 0, 114, 0, 0, 0]);
+  t.is('', stream.decodeString(0, 1, 'utf16-bom', true));
+  t.is('', stream.decodeString(0, 1, 'utf16-bom', false));
+});
+
+test('decodeString invalid encoding', (t) => {
+  const stream = makeStream([0xdc, 0x00, 0xdc, 0xbb, 0xdc, 0x00]);
+  const error = t.throws(() => {
+    stream.decodeString(0, null, 'magic');
+  }, Error);
+
+  t.is(error.message, 'Unknown encoding: magic');
+});
+
+test('decodeString invalid utf8-sequence', (t) => {
+  const stream = makeStream([0xdc, 0x00, 0xe0, 0xbb, 0xdc, 0x00]);
+  const error = t.throws(() => {
+    stream.decodeString(0, null, 'utf16be');
+  }, Error);
+
+  t.is(error.message, 'Invalid utf16 sequence.');
 });

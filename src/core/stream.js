@@ -406,7 +406,8 @@ export default class AVStream {
             break;
           }
           case 'utf16bom':
-          case 'utf16-bom': {
+          case 'utf16-bom':
+          default: {
             if ((length < 2) || ((bom = this.peekUInt16(offset)) === nullEnd)) {
               if (advance) { this.advance(offset += 2); }
               return result;
@@ -415,9 +416,6 @@ export default class AVStream {
             littleEndian = (bom === 0xfffe);
             offset += 2;
             break;
-          }
-          default: {
-            throw new Error(`Unknown encoding: ${encoding}`);
           }
         }
 
@@ -428,10 +426,6 @@ export default class AVStream {
           if ((w1 < 0xd800) || (w1 > 0xdfff)) {
             result += String.fromCharCode(w1);
           } else {
-            if (w1 > 0xdbff) {
-              throw new Error('Invalid utf16 sequence.');
-            }
-
             const w2 = this.peekUInt16(offset, littleEndian);
             if ((w2 < 0xdc00) || (w2 > 0xdfff)) {
               throw new Error('Invalid utf16 sequence.');

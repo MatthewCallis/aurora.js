@@ -53,6 +53,9 @@ test('advance', (t) => {
   t.is(2, list.numBuffers);
   t.is(0, list.availableBuffers);
   t.is(0, list.availableBytes);
+
+  delete list.first;
+  t.is(false, list.advance());
 });
 
 test('rewind', (t) => {
