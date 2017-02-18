@@ -18,13 +18,13 @@ export default class AVDecoder extends AVEventEmitter {
     this.waiting = false;
 
     this.demuxer.on('cookie', (cookie) => {
+      /* istanbul ignore next */
       try {
-        return this.setCookie(cookie);
+        this.setCookie(cookie);
       } catch (error) {
-        return this.emit('error', error);
+        this.emit('error', error);
       }
-    }
-        );
+    });
 
     this.demuxer.on('data', (chunk) => {
       list.append(chunk);
@@ -45,7 +45,7 @@ export default class AVDecoder extends AVEventEmitter {
 
   init() {}
 
-  setCookie(cookie) {}
+  setCookie() {}
 
   readChunk() {}
 
@@ -57,23 +57,24 @@ export default class AVDecoder extends AVEventEmitter {
     try {
       packet = this.readChunk();
     } catch (error) {
+      /* istanbul ignore else */
       if (!(error instanceof AVUnderflowError)) {
         this.emit('error', error);
         return false;
       }
     }
 
-        // if a packet was successfully read, emit it
+    // if a packet was successfully read, emit it
     if (packet) {
       this.emit('data', packet);
       return true;
 
-        // if we haven't reached the end, jump back and try again when we have more data
+    // if we haven't reached the end, jump back and try again when we have more data
     } else if (!this.receivedFinalBuffer) {
       this.bitstream.seek(offset);
       this.waiting = true;
 
-        // otherwise we've reached the end
+    // otherwise we've reached the end
     } else {
       this.emit('end');
     }
@@ -81,10 +82,14 @@ export default class AVDecoder extends AVEventEmitter {
     return false;
   }
 
+  // TODO: Nothing implements seeking.
   seek(timestamp) {
     // use the demuxer to get a seek point
+    /* istanbul ignore next */
     const seekPoint = this.demuxer.seek(timestamp);
+    /* istanbul ignore next */
     this.stream.seek(seekPoint.offset);
+    /* istanbul ignore next */
     return seekPoint.timestamp;
   }
 
@@ -96,10 +101,6 @@ export default class AVDecoder extends AVEventEmitter {
   static find(id) {
     return AVDecoder.codecs[id] || null;
   }
-
-  get codecs() {
-    return AVDecoder.codecs;
-  }
 }
 
-AVDecoder.codecs = [];
+AVDecoder.codecs = {};

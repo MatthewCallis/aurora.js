@@ -3,12 +3,8 @@ import AVBufferList from './core/bufferlist';
 import AVStream from './core/stream';
 
 export default class AVDemuxer extends AVEventEmitter {
-  static probe(buffer) {
-    return false;
-  }
-
   constructor(source, chunk) {
-    super(source, chunk);
+    super();
 
     const list = new AVBufferList();
     list.append(chunk);
@@ -100,8 +96,8 @@ export default class AVDemuxer extends AVEventEmitter {
     return null;
   }
 
-  get formats() {
-    return AVDemuxer.formats;
+  static probe() {
+    return false;
   }
 }
 
