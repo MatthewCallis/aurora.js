@@ -35,7 +35,22 @@ decoderTest('lef32', {
   data: '9b2a9317',
 });
 
+decoderTest('lei32', {
+  file: 'wave/lei32.wav',
+  data: '9826e28b',
+});
+
 decoderTest('lef64', {
   file: 'caf/lef64.caf',
   data: '9a3372e',
+});
+
+decoderTest('Unsupported bit depth (signed)', {
+  file: 'wave/lei25_bad_bit_depth.wav',
+  error: 'Unsupported bit depth. (25)',
+});
+
+decoderTest('Unsupported bit depth (floating point)', {
+  file: 'wave/lef25_bad_bit_depth.wav',
+  error: 'Unsupported bit depth. (25)',
 });

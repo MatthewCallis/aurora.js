@@ -35,7 +35,8 @@ export default class LPCMDecoder extends AVDecoder {
           break;
         }
         default: {
-          throw new Error('Unsupported bit depth.');
+          this.emit('error', `Unsupported bit depth. (${this.format.bitsPerChannel})`);
+          return null;
         }
       }
     } else {
@@ -69,7 +70,8 @@ export default class LPCMDecoder extends AVDecoder {
           break;
         }
         default: {
-          throw new Error('Unsupported bit depth.');
+          this.emit('error', `Unsupported bit depth. (${this.format.bitsPerChannel})`);
+          return null;
         }
       }
     }

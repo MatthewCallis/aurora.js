@@ -28,8 +28,13 @@ const decoderTest = (name, config) =>
     }
 
     source.once('data', (chunk) => {
-      const Demuxer = AVDemuxer.find(chunk);
-      const demuxer = new Demuxer(source, chunk);
+      let demuxer;
+      if (config.demuxer) {
+        demuxer = new config.demuxer(source, chunk);
+      } else {
+        const Demuxer = AVDemuxer.find(chunk);
+        demuxer = new Demuxer(source, chunk);
+      }
 
       demuxer.once('format', (format) => {
         const Decoder = AVDecoder.find(format.formatID);
@@ -40,8 +45,16 @@ const decoderTest = (name, config) =>
           crc.update(new AVBuffer(new Uint8Array(data_chunk.buffer)));
         });
 
+        if (config.error) {
+          decoder.on('error', (error) => {
+            t.is(error, config.error);
+          });
+        }
+
         decoder.on('end', () => {
-          t.is(crc.toHex(), config.data);
+          if (!config.error) {
+            t.is(crc.toHex(), config.data);
+          }
           t.end();
         });
 
@@ -51,6 +64,7 @@ const decoderTest = (name, config) =>
           }
           decoder.once('data', read);
         }
+
         read();
       });
     });
