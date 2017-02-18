@@ -16,6 +16,19 @@ test('copy', (t) => {
   t.deepEqual(copy, bitstream);
 });
 
+test('available', (t) => {
+  const bitstream = makeBitstream([10, 160], [20, 29, 119]);
+  let available = bitstream.available(1);
+
+  t.true(available);
+
+  available = bitstream.available(2);
+  t.true(available);
+
+  available = bitstream.available(32);
+  t.false(available);
+});
+
 test('advance', (t) => {
   const bitstream = makeBitstream([10, 160]);
 
@@ -102,6 +115,9 @@ test('read/peek unsigned', (t) => {
   // 0111 0000 1001 1010 0010 0101 1111 0011 -> 0x709a25f3
   let bitstream = makeBitstream([0x5d, 0x6f, 0xae, 0xc8, 0x70, 0x9a, 0x25, 0xf3]);
 
+  t.is(0, bitstream.peek(0));
+  t.is(0, bitstream.read(0));
+
   t.is(1, bitstream.peek(2));
   t.is(1, bitstream.read(2));
 
@@ -141,10 +157,15 @@ test('read/peek unsigned', (t) => {
   t.is(0xffffffff, bitstream.peek(32));
   t.is(0xfffffffff, bitstream.peek(36));
   t.is(0xffffffffff, bitstream.peek(40));
+
+  t.throws(() => bitstream.read(128), Error);
 });
 
 test('read/peek signed', (t) => {
   let bitstream = makeBitstream([0x5d, 0x6f, 0xae, 0xc8, 0x70, 0x9a, 0x25, 0xf3]);
+
+  t.is(0, bitstream.peek(0));
+  t.is(0, bitstream.read(0));
 
   t.is(5, bitstream.peek(4, true));
   t.is(5, bitstream.read(4, true));
@@ -191,6 +212,8 @@ test('read/peek signed', (t) => {
   t.is(-1, bitstream.peek(32, true));
   t.is(-1, bitstream.peek(36, true));
   t.is(-1, bitstream.peek(40, true));
+
+  t.throws(() => bitstream.read(128), Error);
 });
 
 test('readLSB unsigned', (t) => {
@@ -198,6 +221,9 @@ test('readLSB unsigned', (t) => {
   // { 3   2      1   }{       3    }
   // { 1][111] [1100] }{ [0000 1000 } -> 0xfc08
   let bitstream = makeBitstream([0xfc, 0x08]);
+
+  t.is(0, bitstream.peekLSB(0));
+  t.is(0, bitstream.readLSB(0));
 
   t.is(12, bitstream.peekLSB(4));
   t.is(12, bitstream.readLSB(4));
@@ -237,10 +263,16 @@ test('readLSB unsigned', (t) => {
   t.is(0xffffffff, bitstream.peekLSB(32));
   t.is(0xfffffffff, bitstream.peekLSB(36));
   t.is(0xffffffffff, bitstream.peekLSB(40));
+
+  t.throws(() => bitstream.readLSB(128), Error);
 });
 
 test('readLSB signed', (t) => {
   let bitstream = makeBitstream([0xfc, 0x08]);
+
+  t.is(0, bitstream.peekLSB(0));
+  t.is(0, bitstream.readLSB(0));
+
   t.is(-4, bitstream.peekLSB(4, true));
   t.is(-4, bitstream.readLSB(4, true));
 
@@ -278,4 +310,6 @@ test('readLSB signed', (t) => {
   t.is(-1, bitstream.peekLSB(32, true));
   t.is(-1, bitstream.peekLSB(36, true));
   t.is(-1, bitstream.peekLSB(40, true));
+
+  t.throws(() => bitstream.readLSB(128), Error);
 });
