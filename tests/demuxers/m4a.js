@@ -1,3 +1,4 @@
+import M4ADemuxer from './../../src/demuxers/m4a';
 import demuxerTest from './_demuxerTest';
 
 demuxerTest('base', {

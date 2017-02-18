@@ -130,9 +130,3 @@ demuxerTest('Unsupported CAF due to oversized pakt 1', {
   demuxer: CAFDemuxer,
   error: 'Sizes greater than 32 bits are not supported.',
 });
-
-demuxerTest('Unsupported CAF due to oversized pakt 2', {
-  file: 'caf/aac_oversized_pakt_b.caf',
-  demuxer: CAFDemuxer,
-  error: 'Sizes greater than 32 bits are not supported.',
-});

@@ -428,6 +428,7 @@ export default class M4ADemuxer extends AVDemuxer {
       this.metadata[field] = this.stream.readBuffer(this.len);
     });
 
+    /* istanbul ignore next */
     meta('gnre', 'genre', (field) => {
       // standard genres
       const genres = [

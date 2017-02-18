@@ -2,6 +2,7 @@ import AVDemuxer from '../demuxer';
 import M4ADemuxer from './m4a';
 
 export default class CAFDemuxer extends AVDemuxer {
+  // https://developer.apple.com/library/content/qa/qa1534/_index.html
   // https://developer.apple.com/library/content/documentation/MusicAudio/Reference/CAFSpec/CAF_spec/CAF_spec.html
   // kAudioFormatLinearPCM      = 'lpcm',
   // kAudioFormatAppleIMA4      = 'ima4',
@@ -93,6 +94,7 @@ export default class CAFDemuxer extends AVDemuxer {
           break;
         }
         case 'pakt': {
+          /* istanbul ignore else */
           if (this.stream.available(this.headerCache.size)) {
             if (this.stream.readUInt32() !== 0) {
               this.emit('error', 'Sizes greater than 32 bits are not supported.');
@@ -117,14 +119,16 @@ export default class CAFDemuxer extends AVDemuxer {
             let sampleOffset = 0;
             for (let i = 0; i < this.numPackets; i++) {
               this.addSeekPoint(byteOffset, sampleOffset);
-              byteOffset += this.format.bytesPerPacket || M4ADemuxer.readDescrLen(this.stream);
-              sampleOffset += this.format.framesPerPacket || M4ADemuxer.readDescrLen(this.stream);
+              byteOffset += this.format.bytesPerPacket || /* istanbul ignore next */ M4ADemuxer.readDescrLen(this.stream);
+              sampleOffset += this.format.framesPerPacket || /* istanbul ignore next */ M4ADemuxer.readDescrLen(this.stream);
             }
 
             this.headerCache = null;
           }
           break;
         }
+        // TODO: Haven't found a file with this type.
+        /* istanbul ignore next */
         case 'info': {
           const entries = this.stream.readUInt32();
           const metadata = {};
@@ -165,6 +169,7 @@ export default class CAFDemuxer extends AVDemuxer {
           break;
         }
         default: {
+          /* istanbul ignore else */
           if (this.stream.available(this.headerCache.size)) {
             this.stream.advance(this.headerCache.size);
             this.headerCache = null;
