@@ -6,7 +6,6 @@
 
 import AVEventEmitter from './core/events';
 
-const devices = [];
 export default class AVAudioDevice extends AVEventEmitter {
   constructor(sampleRate, channels) {
     super(sampleRate, channels);
@@ -23,7 +22,9 @@ export default class AVAudioDevice extends AVEventEmitter {
     if (this.playing) { return; }
     this.playing = true;
 
-    if (this.device == null) { this.device = AVAudioDevice.create(this.sampleRate, this.channels); }
+    if (this.device == null) {
+      this.device = AVAudioDevice.create(this.sampleRate, this.channels);
+    }
     if (!this.device) {
       throw new Error('No supported audio device found.');
     }
@@ -66,16 +67,18 @@ export default class AVAudioDevice extends AVEventEmitter {
   }
 
   static register(device) {
-    return devices.push(device);
+    AVAudioDevice.devices.push(device);
   }
 
   static create(sampleRate, channels) {
-    for (const device of Array.from(devices)) {
-      if (device.supported) {
-        return new device(sampleRate, channels);
+    for (const Device of Array.from(AVAudioDevice.devices)) {
+      if (Device.supported) {
+        return new Device(sampleRate, channels);
       }
     }
 
     return null;
   }
 }
+
+AVAudioDevice.devices = [];

@@ -1,4 +1,3 @@
-// import "resampler.js"
 import AVAudioDevice from '../device';
 import AVEventEmitter from '../core/events';
 import Resampler from './resampler';

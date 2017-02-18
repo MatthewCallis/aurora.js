@@ -1,8 +1,4 @@
-let global = this;
-
-//import "src/aurora.coffee"
-//import "src/sources/browser/http.coffee"
-//import "src/sources/browser/file.coffee"
-//import "src/devices/webaudio.coffee"
-
-return global.AV = AV;
+import './aurora';
+import './src/sources/browser/http';
+import './src/sources/browser/file';
+import './src/devices/webaudio';

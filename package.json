@@ -11,7 +11,9 @@
     "url": "https://github.com/audiocogs/aurora.js.git"
   },
   "bugs": "https://github.com/audiocogs/aurora.js/issues",
-  "dependencies": {},
+  "dependencies": {
+    "speaker": "^0.3.0"
+  },
   "devDependencies": {
     "ava": "^0.18.1",
     "babel-cli": "^6.23.0",
@@ -80,7 +82,17 @@
       "babel-register"
     ],
     "verbose": true,
-    "babel": "inherit"
+    "babel": {
+      "presets": [
+        [
+          "es2015"
+        ]
+      ],
+      "plugins": [
+        "babel-plugin-espower",
+        "transform-object-rest-spread"
+      ]
+    }
   },
   "nyc": {
     "cache": true,

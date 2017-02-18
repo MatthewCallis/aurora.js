@@ -1,21 +1,18 @@
-const AV = {};
+import './src/core/buffer';
+import './src/core/bufferlist';
+import './src/core/stream';
+import './src/core/bitstream';
+import './src/core/events';
 
-//import "core/base.coffee"
-//import "core/buffer.coffee"
-//import "core/bufferlist.coffee"
-//import "core/stream.coffee"
-//import "core/bitstream.coffee"
-//import "core/events.coffee"
+import './src/sources/buffer';
 
-//import "sources/buffer.coffee"
+import './src/demuxer';
+import './src/decoder';
+import './src/queue';
+import './src/device';
+import './src/asset';
+import './src/player';
 
-//import "demuxer.coffee"
-//import "decoder.coffee"
-//import "queue.coffee"
-//import "device.coffee"
-//import "asset.coffee"
-//import "player.coffee"
-
-//import "filter.coffee"
-//import "filters/volume.coffee"
-//import "filters/balance.coffee"
+import './src/filter';
+import './src/filters/volume';
+import './src/filters/balance';
