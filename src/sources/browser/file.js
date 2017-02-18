@@ -6,11 +6,6 @@ export default class AVFileSource extends AVEventEmitter {
     super();
 
     this.file = file;
-    if (typeof FileReader === 'undefined' || FileReader === null) {
-      this.emit('error', 'This browser does not have FileReader support.');
-      return;
-    }
-
     this.offset = 0;
     this.length = this.file.size;
     this.chunkSize = 1 << 20;
@@ -18,7 +13,10 @@ export default class AVFileSource extends AVEventEmitter {
 
   start() {
     if (this.reader) {
-      if (!this.active) { return this.loop(); }
+      if (!this.active) {
+        this.loop();
+        return;
+      }
     }
 
     this.reader = new FileReader();
@@ -46,7 +44,7 @@ export default class AVFileSource extends AVEventEmitter {
 
     this.reader.onprogress = e => this.emit('progress', ((this.offset + e.loaded) / this.length) * 100);
 
-    return this.loop();
+    this.loop();
   }
 
   loop() {
@@ -54,7 +52,7 @@ export default class AVFileSource extends AVEventEmitter {
     const endPos = Math.min(this.offset + this.chunkSize, this.length);
 
     const blob = this.file.slice(this.offset, endPos);
-    return this.reader.readAsArrayBuffer(blob);
+    this.reader.readAsArrayBuffer(blob);
   }
 
   pause() {

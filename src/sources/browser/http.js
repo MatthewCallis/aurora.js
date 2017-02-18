@@ -14,7 +14,8 @@ export default class AVHTTPSource extends AVEventEmitter {
   start() {
     if (this.length) {
       if (!this.inflight) {
-        return this.loop();
+        this.loop();
+        return;
       }
     }
 
@@ -29,7 +30,7 @@ export default class AVHTTPSource extends AVEventEmitter {
 
     this.xhr.onerror = (err) => {
       this.pause();
-      return this.emit('error', err);
+      this.emit('error', err);
     };
 
     this.xhr.onabort = () => {
@@ -37,12 +38,13 @@ export default class AVHTTPSource extends AVEventEmitter {
     };
 
     this.xhr.open('HEAD', this.url, true);
-    return this.xhr.send(null);
+    this.xhr.send(null);
   }
 
   loop() {
     if (this.inflight || !this.length) {
-      return this.emit('error', 'Something is wrong in HTTPSource.loop');
+      this.emit('error', 'Something is wrong in HTTPSource.loop');
+      return;
     }
 
     this.inflight = true;
@@ -76,7 +78,7 @@ export default class AVHTTPSource extends AVEventEmitter {
 
     this.xhr.onerror = (err) => {
       this.emit('error', err);
-      return this.pause();
+      this.pause();
     };
 
     this.xhr.onabort = () => {
@@ -89,7 +91,7 @@ export default class AVHTTPSource extends AVEventEmitter {
     const endPos = Math.min(this.offset + this.chunkSize, this.length);
     this.xhr.setRequestHeader('Range', `bytes=${this.offset}-${endPos}`);
     this.xhr.overrideMimeType('text/plain; charset=x-user-defined');
-    return this.xhr.send(null);
+    this.xhr.send(null);
   }
 
   pause() {

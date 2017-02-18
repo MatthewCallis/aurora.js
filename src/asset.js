@@ -1,14 +1,12 @@
-//
 // The Asset class is responsible for managing all aspects of the
 // decoding pipeline from source to decoder.  You can use the Asset
 // class to inspect information about an audio file, such as its
 // format, metadata, and duration, as well as actually decode the
 // file to linear PCM raw audio data.
-//
+
+/* global AVHTTPSource, AVFileSource */
 
 import AVEventEmitter from './core/events';
-import AVHTTPSource from './sources/node/http';
-import AVFileSource from './sources/node/file';
 import AVBufferSource from './sources/buffer';
 import AVDemuxer from './demuxer';
 import AVDecoder from './decoder';
@@ -31,7 +29,6 @@ export default class AVAsset extends AVEventEmitter {
 
     this.source.once('data', this.probe);
     this.source.on('error', (err) => {
-      console.log('AVAsset err', err);
       this.emit('error', err);
       this.stop();
     });
@@ -122,16 +119,15 @@ export default class AVAsset extends AVEventEmitter {
   }
 
   probe(chunk) {
-    console.log('AVAsset probe', chunk);
     if (!this.active) { return; }
 
-    const demuxer = AVDemuxer.find(chunk);
-    if (!demuxer) {
+    const Demuxer = AVDemuxer.find(chunk);
+    if (!Demuxer) {
       this.emit('error', 'A demuxer for this container was not found.');
       return;
     }
 
-    this.demuxer = new demuxer(this.source, chunk);
+    this.demuxer = new Demuxer(this.source, chunk);
     this.demuxer.on('format', this.findDecoder);
 
     this.demuxer.on('duration', (duration) => {
@@ -158,13 +154,13 @@ export default class AVAsset extends AVEventEmitter {
 
     this.emit('format', this.format);
 
-    const decoder = AVDecoder.find(this.format.formatID);
-    if (!decoder) {
+    const Decoder = AVDecoder.find(this.format.formatID);
+    if (!Decoder) {
       this.emit('error', `A decoder for ${this.format.formatID} was not found.`);
       return;
     }
 
-    this.decoder = new decoder(this.demuxer, this.format);
+    this.decoder = new Decoder(this.demuxer, this.format);
 
     if (this.format.floatingPoint) {
       this.decoder.on('data', buffer => this.emit('data', buffer));
