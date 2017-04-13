@@ -5,6 +5,7 @@
     "no-inferred-method-name",
     "xss",
     "html",
+    "ava",
   ],
   "env": {
     "es6": true,
