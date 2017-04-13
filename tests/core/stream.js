@@ -408,8 +408,8 @@ test('float32', (t) => {
 
   // special cases
   const stream2 = makeStream([0xff, 0xff, 0x7f, 0x7f]);
-  t.truthy(isNaN(stream2.peekFloat32()));
-  t.truthy(isNaN(stream2.peekFloat32(0)));
+  t.true(isNaN(stream2.peekFloat32()));
+  t.true(isNaN(stream2.peekFloat32(0)));
   t.is(3.4028234663852886e+38, stream2.peekFloat32(0, true));
 });
 
@@ -438,16 +438,16 @@ test('float64', (t) => {
 
   stream = makeStream([0xff, 0xff, 0xff, 0xff, 0xff, 0xff], [0x0f, 0x00]);
   copy = stream.copy();
-  t.truthy(isNaN(stream.peekFloat64(0)));
+  t.true(isNaN(stream.peekFloat64(0)));
   t.is(2.225073858507201e-308, stream.peekFloat64(0, true));
-  t.truthy(isNaN(stream.readFloat64()));
+  t.true(isNaN(stream.readFloat64()));
   t.is(2.225073858507201e-308, copy.readFloat64(true));
 
   stream = makeStream([0xff, 0xff, 0xff, 0xff, 0xff, 0xff], [0xef, 0x7f]);
   copy = stream.copy();
-  t.truthy(isNaN(stream.peekFloat64(0)));
+  t.true(isNaN(stream.peekFloat64(0)));
   t.is(1.7976931348623157e+308, stream.peekFloat64(0, true));
-  t.truthy(isNaN(stream.readFloat64()));
+  t.true(isNaN(stream.readFloat64()));
   t.is(1.7976931348623157e+308, copy.readFloat64(true));
 
   stream = makeStream([0, 0, 0, 0, 0, 0], [0xf0, 0x3f]);
@@ -549,12 +549,12 @@ test('float80', (t) => {
   t.is(-Infinity, stream.readFloat80(true));
 
   stream = makeStream([0x7f, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
-  t.truthy(isNaN(stream.peekFloat80()));
-  t.truthy(isNaN(stream.readFloat80()));
+  t.true(isNaN(stream.peekFloat80()));
+  t.true(isNaN(stream.readFloat80()));
 
   stream = makeStream([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0x7f]);
-  t.truthy(isNaN(stream.peekFloat80(0, true)));
-  t.truthy(isNaN(stream.readFloat80(true)));
+  t.true(isNaN(stream.peekFloat80(0, true)));
+  t.true(isNaN(stream.readFloat80(true)));
 
   stream = makeStream([0x40, 0x00, 0xc9, 0x0f, 0xda, 0x9e, 0x46, 0xa7, 0x88, 0x00]);
   t.is(3.14159265, stream.peekFloat80());

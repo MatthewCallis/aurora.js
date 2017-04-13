@@ -36,8 +36,8 @@ test.cb('progress', (t) => {
 
   let lastProgress = 0;
   source.on('progress', (progress) => {
-    t.truthy(progress > lastProgress, 'progress > lastProgress');
-    t.truthy(progress <= 100, 'progress <= 100');
+    t.true(progress > lastProgress, 'progress > lastProgress');
+    t.true(progress <= 100, 'progress <= 100');
     lastProgress = progress;
   });
 
@@ -53,7 +53,7 @@ test.cb('invalid url error', (t) => {
   const source = new AVHTTPSource('http://dlfigu');
 
   source.on('error', () => {
-    t.truthy(true);
+    t.true(true);
     t.end();
   });
 
@@ -64,7 +64,7 @@ test.cb('404', (t) => {
   const source = new AVHTTPSource('http://localhost:8181/tests/data/nothing.m4a');
 
   source.on('error', () => {
-    t.truthy(true);
+    t.true(true);
     t.end();
   });
 

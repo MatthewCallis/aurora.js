@@ -1,5 +1,8 @@
 {
-  "extends": "airbnb",
+  "extends": [
+    "airbnb",
+    "plugin:ava/recommended"
+  ],
   "plugins": [
     "hapi",
     "no-inferred-method-name",

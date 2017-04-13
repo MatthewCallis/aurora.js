@@ -63,8 +63,8 @@ test.cb('progress', (t) => {
   getSource((source) => {
     let lastProgress = 0;
     source.on('progress', (progress) => {
-      t.truthy(progress > lastProgress, 'progress > lastProgress');
-      t.truthy(progress <= 100, 'progress <= 100');
+      t.true(progress > lastProgress, 'progress > lastProgress');
+      t.true(progress <= 100, 'progress <= 100');
       lastProgress = progress;
     });
 
